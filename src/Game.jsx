@@ -8,7 +8,7 @@ function Game() {
 
   return (
     <Container>
-        <h1>Game</h1>>
+        <h1>Game</h1>
     </Container>
   );
 }
