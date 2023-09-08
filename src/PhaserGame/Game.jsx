@@ -1,7 +1,7 @@
 import './Game.css';
 import React from 'react';
 import {Container} from 'react-bootstrap';
-import {Link} from "wouter";
+// import {Link} from "wouter";
 
 
 function Game() {
