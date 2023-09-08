@@ -16,7 +16,7 @@ function Home() {
       <h1 className="Home-title">
         Sort Game
       </h1>
-      <Link href="/PhaserGame/Game" >
+      <Link href="/Game" >
         <Button size="lg" className="Start-button" >Start game</Button>
       </Link>
     </Container>

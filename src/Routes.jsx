@@ -1,6 +1,6 @@
 import { Route } from 'wouter';
 import Home from './Home';
-import Game from './PhaserGame/Game';
+import Game from './Game';
 
 const Routes = () => {
     return (

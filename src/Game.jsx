@@ -1,6 +1,7 @@
+import './App.css';
 import React from 'react';
-import {Container} from 'react-bootstrap';
-// import {Link} from "wouter";
+import {Container,Button} from 'react-bootstrap';
+import {Link} from "wouter";
 
 
 function Game() {
