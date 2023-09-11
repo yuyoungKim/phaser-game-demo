@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import Score from './classes/Score.js';
 export class Load extends Phaser.Scene {
     constructor() {
         super({
@@ -22,16 +23,21 @@ export class Load extends Phaser.Scene {
         this.loadFont('TruculentaBold', '/fonts/Truculenta-Black.ttf');
         this.load.image("bg", './image/bg.png');
 
+        
+
         // Cards
-        this.load.image("1_11", './image/1_11.png');
+        this.load.image("1_or_11", './image/1_or_11.png');
         this.load.image("double", './image/double.png');
         this.load.image("redraw", './image/redraw.png');
         this.load.image("resurrect", './image/resurrect.png');
         this.load.image("steal", './image/steal.png');
         this.load.image("tie_breaker", './image/tie_breaker.png');
         
+        
         //Elements
         this.load.image("crate", '/image/crate.png');
+
+        
     }
 
     create() {
@@ -46,6 +52,32 @@ export class Load extends Phaser.Scene {
         let scale = Math.max(scaleX, scaleY);
         bg.setScale(scale);
         const {width, height} = this.scale
+
+        // Insert crates
+        const crates = [];
+        for (let i = 0; i < 6; i++) {
+            const x = width * (0.1 + (i % 6 * 0.15));
+            const y = height * (i < 6 ? 0.8 : 0.65);
+            const crate = this.add.sprite(x, y, 'crate').setScale(0.75)
+            crates.push(crate);
+        }
+
+        // Insert cards
+        const cards = ["1_or_11","double","redraw","resurrect","steal","tie_breaker"]
+        for (let i = 0; i < 6; i++) {
+            const x = width * (0.1 + (i % 6 * 0.15));
+            const y = height * (i < 6 ? 0.84 : 0.65);
+            const card = this.add.sprite(x, y, cards[i]).setScale(0.3)
+            crates.push(card);
+        }
+        
+        //Insert Scoreboard
+        const score = 100;
+        this.add.score(500, 100, 1, 0, score);
+
+
+        // let crate = this.add.image(150, 1450, "crate").setOrigin(0,0).setScale(0.85);
+    
         // fade out after a while
         // this.time.addEvent({
         //         delay: 3900,
