@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
-import { Load } from '../scenes/load.js';
-import SortGame from '../scenes/sortGame.js';
+import { Load } from './scenes/load.js';
+// import SortGame from './scenes/SortGame.js';
 
 // default screen width and height
 let screenWidth = window.outerWidth; // 3840 is for 16:9 ,  2532 is for 19.5:9
@@ -32,7 +32,7 @@ export default function GamePhaser({setGameRef}) {
         },
         scene: [
             Load,
-            SortGame
+
         ],
         parent: "phaser-container",
     };
