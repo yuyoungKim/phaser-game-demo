@@ -5,8 +5,10 @@ export class Load extends Phaser.Scene {
         super({
             key: 'Load'
         });
+        this.cards = [];
+        this.timer = 60;
     }
-
+    
     loadFont(name, url) {
         var newFont = new FontFace(name, `url(${url})`);
         newFont.load().then(function (loaded) {
@@ -16,7 +18,7 @@ export class Load extends Phaser.Scene {
             return error;
         });
     }
-
+    
 
     preload() {
         this.loadFont('Truculenta', '/fonts/Truculenta-Regular.ttf');
@@ -63,7 +65,7 @@ export class Load extends Phaser.Scene {
         }
 
         // Insert cards
-        const cards = ["1_or_11","double","redraw","resurrect","steal","tie_breaker"]
+        let cards = ["1_or_11","double","redraw","resurrect","steal","tie_breaker"];
         for (let i = 0; i < 6; i++) {
             const x = width * (0.1 + (i % 6 * 0.15));
             const y = height * (i < 6 ? 0.84 : 0.65);
@@ -76,7 +78,23 @@ export class Load extends Phaser.Scene {
         this.add.score(500, 100, 1, 0, score);
 
 
-        // let crate = this.add.image(150, 1450, "crate").setOrigin(0,0).setScale(0.85);
+        // Generate random cards from left to right
+            // Set up a repeating timer to spawn a card every 2 seconds
+        this.time.addEvent({
+            delay: 750,
+            callback: this.spawnCard,
+            callbackScope: this,
+            loop: true
+        });
+
+        // 60 seconds countdown timer
+        this.time.addEvent({
+            delay: 1000,
+            callback: this.countdown,
+            callbackScope: this,
+            loop: true
+        });
+
     
         // fade out after a while
         // this.time.addEvent({
@@ -84,5 +102,35 @@ export class Load extends Phaser.Scene {
         //         callback: () => { this.cameras.main.fadeOut(500, 0, 0, 0) },
         // });
     }
-    update() {}
+    update() {
+        this.cards.forEach((cards) => {
+            cards.x += 9; // Change this value to adjust speed
+
+            if (cards.x > 3840 + 700/2) {
+                cards.destroy();
+                this.cards = this.cards.filter(item => item !== cards);
+            }
+        });
+
+        if (this.timer <= 0 && this.spawnEvent) {
+            this.spawnEvent.remove();
+            this.spawnEvent = null;
+        }
+    }
+
+    spawnCard() {
+        let cardNames = ["1_or_11","double","redraw","resurrect","steal","tie_breaker"];
+        let randomCard = Phaser.Math.RND.pick(cardNames);
+        const card = this.add.sprite(0, 850, randomCard).setScale(0.55);
+        this.cards.push(card);
+    }
+    
+    countdown() {
+        this.timer--;
+
+        if (this.timer <= 0 && this.countdownEvent) {
+            this.countdownEvent.remove();
+            this.countdownEvent = null;
+        }
+    }    
 }
