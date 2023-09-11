@@ -94,8 +94,7 @@ export class Load extends Phaser.Scene {
             callbackScope: this,
             loop: true
         });
-
-    
+        
         // fade out after a while
         // this.time.addEvent({
         //         delay: 3900,
@@ -116,14 +115,42 @@ export class Load extends Phaser.Scene {
             this.spawnEvent.remove();
             this.spawnEvent = null;
         }
+
+        if (this.input.dragElement) {
+            this.input.dragElement.x = this.input.activePointer.x;
+            this.input.dragElement.y = this.input.activePointer.y;
+        }
     }
 
     spawnCard() {
         let cardNames = ["1_or_11","double","redraw","resurrect","steal","tie_breaker"];
         let randomCard = Phaser.Math.RND.pick(cardNames);
-        const card = this.add.sprite(0, 850, randomCard).setScale(0.55);
-        this.cards.push(card);
-    }
+        const card = this.add.sprite(0, 850, randomCard).setScale(0.55).setInteractive();
+
+        // When the card is pressed
+        card.on('pointerdown', function (pointer) {
+            this.setData('isBeingDragged', true);
+            this.setTint(0xff0000); 
+        });
+
+        // When the card is released
+        card.on('pointerup', function () {
+            this.setData('isBeingDragged', false);
+            this.clearTint();
+            this.x = this.getData('startPosX');  // Reset the x position to its original
+            this.y = this.getData('startPosY');  // Reset the y position to its original
+        });
+
+        // When the card is being dragged
+        card.on('pointermove', function (pointer) {
+            if (this.getData('isBeingDragged')) {
+                this.x = pointer.x;
+                this.y = pointer.y;
+            }
+        });
+
+            this.cards.push(card);
+        }
     
     countdown() {
         this.timer--;
@@ -132,5 +159,7 @@ export class Load extends Phaser.Scene {
             this.countdownEvent.remove();
             this.countdownEvent = null;
         }
-    }    
+    }
+    
+    
 }
