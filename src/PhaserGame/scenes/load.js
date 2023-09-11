@@ -6,20 +6,20 @@ export class Load extends Phaser.Scene {
         });
     }
 
-    // loadFont(name, url) {
-    //     var newFont = new FontFace(name, `url(${url})`);
-    //     newFont.load().then(function (loaded) {
-    //         document.fonts.add(loaded);
-    //     }).catch(function (error) {
-    //         console.error(error);
-    //         return error;
-    //     });
-    // }
+    loadFont(name, url) {
+        var newFont = new FontFace(name, `url(${url})`);
+        newFont.load().then(function (loaded) {
+            document.fonts.add(loaded);
+        }).catch(function (error) {
+            console.error(error);
+            return error;
+        });
+    }
 
 
     preload() {
-        // this.loadFont('Truculenta', '/fonts/Truculenta-Regular.ttf');
-        // this.loadFont('TruculentaBold', '/fonts/Truculenta-Black.ttf');
+        this.loadFont('Truculenta', '/fonts/Truculenta-Regular.ttf');
+        this.loadFont('TruculentaBold', '/fonts/Truculenta-Black.ttf');
         this.load.image("bg", './image/bg.png');
 
         // Cards
