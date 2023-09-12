@@ -30,7 +30,7 @@ export default class Score extends Phaser.GameObjects.Sprite {
         console.log("Update Score", score)
         if (this.constRotation === 0) {
             if (this.scoreText === undefined){
-                this.scoreText = this.scene.add.text(this.x, this.y + (20*this.scale), score.toString(), { fontSize: 104*this.scale + "px", fontFamily: "Truculenta-Regular", fill: '#000000', align: 'center' }).setOrigin(0.5, 0.5).setDepth(this.depth + 2);
+                this.scoreText = this.scene.add.text(this.x, this.y + (20*this.scale), score.toString(), { fontSize: 104*this.scale + "px", fill: '#000000', align: 'center' }).setOrigin(0.5, 0.5).setDepth(this.depth + 2);
             }
             else {
                 this.scoreText.setText(score)
@@ -39,7 +39,7 @@ export default class Score extends Phaser.GameObjects.Sprite {
         }
         else { //180 degree rotation
             if (this.scoreText === undefined) {
-                this.scoreText = this.scene.add.text(this.x, this.y - (20*this.scale), score.toString(), { fontSize: 104*this.scale + "px", fontFamily: "Truculenta-Regular", fill: '#000000', align: 'center' }).setOrigin(0.5, 0.5).setDepth(this.depth + 2);
+                this.scoreText = this.scene.add.text(this.x, this.y - (20*this.scale), score.toString(), { fontSize: 104*this.scale + "px", fill: '#000000', align: 'center' }).setOrigin(0.5, 0.5).setDepth(this.depth + 2);
             }
             else {
                this.scoreText.setText(score)

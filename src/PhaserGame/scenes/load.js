@@ -1,12 +1,16 @@
 import Phaser from 'phaser';
 import Score from './classes/Score.js';
+import timer from './classes/Timer.js'
 export class Load extends Phaser.Scene {
     constructor() {
         super({
             key: 'Load'
         });
         this.cards = [];
-        this.timer = 60;
+        this.crates = []; // move crates to class level scope
+        this.crateCounters = []; // an array to keep track of the counters
+        this.crateTexts = []; // New array to store text objects
+        this.timedEvent = null;
     }
     
     loadFont(name, url) {
@@ -54,47 +58,60 @@ export class Load extends Phaser.Scene {
         let scale = Math.max(scaleX, scaleY);
         bg.setScale(scale);
         const {width, height} = this.scale
+        
 
         // Insert crates
-        const crates = [];
+        this.crateSprites  = [];
         for (let i = 0; i < 6; i++) {
             const x = width * (0.1 + (i % 6 * 0.15));
             const y = height * (i < 6 ? 0.8 : 0.65);
             const crate = this.add.sprite(x, y, 'crate').setScale(0.75)
-            crates.push(crate);
+            this.crateSprites.push(crate);
         }
 
+
+
+        // Insert counters
+        this.crateTexts = [];
+        this.crateCounters = this.crateSprites.map(() => 0);  // Initializes all counters to 0
+        this.crateSprites.forEach((crate, index) => {
+            const x = width * (0.1 + (index % 6 * 0.15));
+            const y = height * 0.735;
+            const text = this.add.text(x, y, '0', { 
+                font: '100px TruculentaBold', 
+                fill: '#ffffff', 
+            }).setOrigin(0.5);
+            this.crateTexts.push(text);
+        });
+
         // Insert cards
-        let cards = ["1_or_11","double","redraw","resurrect","steal","tie_breaker"];
+        this.cards = [];
+        let cardNames = ["1_or_11","double","redraw","resurrect","steal","tie_breaker"];
         for (let i = 0; i < 6; i++) {
             const x = width * (0.1 + (i % 6 * 0.15));
             const y = height * (i < 6 ? 0.84 : 0.65);
-            const card = this.add.sprite(x, y, cards[i]).setScale(0.3)
-            crates.push(card);
+            this.add.image(x, y, cardNames[i]).setScale(0.3)
         }
         
         //Insert Scoreboard
         const score = 100;
         this.add.score(500, 100, 1, 0, score);
 
+        //Insert Timer
+        this.timerDisplay = this.add.timer(1000, 200, 1, 100, 5);
+
 
         // Generate random cards from left to right
-            // Set up a repeating timer to spawn a card every 2 seconds
-        this.time.addEvent({
+        // Set up a repeating timer to spawn a card every 2 seconds
+        this.spawnEvent = this.time.addEvent({
             delay: 750,
             callback: this.spawnCard,
             callbackScope: this,
             loop: true
         });
-
-        // 60 seconds countdown timer
-        this.time.addEvent({
-            delay: 1000,
-            callback: this.countdown,
-            callbackScope: this,
-            loop: true
-        });
         
+
+       
         // fade out after a while
         // this.time.addEvent({
         //         delay: 3900,
@@ -111,10 +128,14 @@ export class Load extends Phaser.Scene {
             }
         });
 
-        if (this.timer <= 0 && this.spawnEvent) {
+        if (this.timerDisplay && this.timerDisplay.getTime() <= 0 && this.spawnEvent) {
+            this.timerDisplay.destroy();
+            this.timerDisplay = null;
             this.spawnEvent.remove();
             this.spawnEvent = null;
         }
+
+
 
         if (this.input.dragElement) {
             this.input.dragElement.x = this.input.activePointer.x;
@@ -123,14 +144,21 @@ export class Load extends Phaser.Scene {
     }
 
     spawnCard() {
+
+
+        if (this.timerDisplay && this.timerDisplay.getTime() <= 0) {
+            return; // exit early if timer reached zero
+        }
         let cardNames = ["1_or_11","double","redraw","resurrect","steal","tie_breaker"];
-        let randomCard = Phaser.Math.RND.pick(cardNames);
-        const card = this.add.sprite(0, 850, randomCard).setScale(0.55).setInteractive();
+        let randomCardIndex = Phaser.Math.Between(0, cardNames.length - 1);
+        let randomCardName = cardNames[randomCardIndex];
+        const card = this.add.sprite(0, 850, randomCardName).setScale(0.55).setInteractive();
+        card.setData('typeIndex', randomCardIndex);  // Store the index/type of the card
 
         // When the card is pressed
         card.on('pointerdown', function (pointer) {
             this.setData('isBeingDragged', true);
-            this.setTint(0xff0000); 
+            // this.setTint(0xff0000); 
         });
 
         // When the card is released
@@ -139,6 +167,25 @@ export class Load extends Phaser.Scene {
             this.clearTint();
             this.x = this.getData('startPosX');  // Reset the x position to its original
             this.y = this.getData('startPosY');  // Reset the y position to its original
+
+            let collidedWithCrate = false;
+
+            this.scene.crateSprites.forEach((crate, index) => {
+                if (Phaser.Geom.Intersects.RectangleToRectangle(this.getBounds(), crate.getBounds())) {
+                    if (this.getData('typeIndex') === index) { // Only increment counter for matching crate
+                        this.scene.crateCounters[index]++;
+                        this.scene.crateTexts[index].setText(this.scene.crateCounters[index].toString());
+                        collidedWithCrate = true;
+                    }
+                }
+            });
+
+            if (!collidedWithCrate) {
+                this.x = this.getData('startPosX');
+                this.y = this.getData('startPosY');
+            } else {
+                this.destroy();  // Remove the card if it's dropped on a crate.
+            }
         });
 
         // When the card is being dragged
@@ -150,16 +197,6 @@ export class Load extends Phaser.Scene {
         });
 
             this.cards.push(card);
-        }
-    
-    countdown() {
-        this.timer--;
-
-        if (this.timer <= 0 && this.countdownEvent) {
-            this.countdownEvent.remove();
-            this.countdownEvent = null;
-        }
     }
-    
-    
+
 }
