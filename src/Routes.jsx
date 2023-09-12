@@ -1,9 +1,13 @@
-import { Route } from 'wouter';
+import { Route, useRouter } from 'wouter';
 import Home from './Home';
 import Game from './PhaserGame/Game';
+import RouterContext from './RouterContext';
 
 const Routes = () => {
+    const { push } = useRouter();
+
     return (
+        <RouterContext.Provider value={push}>
         <>
             <Route exact path="/">
                 <Home></Home>
@@ -13,6 +17,7 @@ const Routes = () => {
                 <Game></Game>
             </Route>
         </>
+        </RouterContext.Provider>
     )
 }
 

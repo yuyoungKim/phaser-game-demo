@@ -31,8 +31,7 @@ export default function GamePhaser({setGameRef}) {
             createContainer: true,
         },
         scene: [
-            Load,
-
+            Load
         ],
         parent: "phaser-container",
     };
@@ -45,6 +44,7 @@ export default function GamePhaser({setGameRef}) {
         phaserGameRef.current = new Phaser.Game(config);
         setGameRef(phaserGameRef.current);
         //setGameRef(phaserGameRef.current);
+
         return () => {
             phaserGameRef.current.destroy(true);
             phaserGameRef.current = null;

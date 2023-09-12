@@ -12,6 +12,8 @@ export class Load extends Phaser.Scene {
         this.crateTexts = []; // New array to store text objects
         this.timedEvent = null;
         this.score = 0;
+        this.matchCount = 0;
+        this.mismatchCount = 0;
     }
     
     loadFont(name, url) {
@@ -24,13 +26,30 @@ export class Load extends Phaser.Scene {
         });
     }
     
+    createRoundedRectangle(scene, x, y, width, height, radius, color, borderWidth, borderColor) {
+        const graphics = scene.add.graphics();
+    
+        graphics.fillStyle(color);
+        
+        // Border style for the rectangle
+        graphics.lineStyle(borderWidth, borderColor);
+
+        graphics.strokeRoundedRect(x, y, width, height, radius);
+        graphics.fillRoundedRect(x, y, width, height, radius);
+
+    
+        return graphics;
+    }
+    
 
     preload() {
         this.loadFont('Truculenta', '/fonts/Truculenta-Regular.ttf');
         this.loadFont('TruculentaBold', '/fonts/Truculenta-Black.ttf');
         this.load.image("bg", './image/bg.png');
 
-        
+        this.load.image("retryButton", './image/blue_button_300.png')
+        this.load.image("exitButton", './image/red_button_300.png')
+        this.load.image("skull", './image/512x512.png')
 
         // Cards
         this.load.image("1_or_11", './image/1_or_11.png');
@@ -114,7 +133,7 @@ export class Load extends Phaser.Scene {
         this.scoreDisplay = this.add.score(2700, 200, 1, 100, score);
 
         //Insert Timer
-        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 60);
+        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 2);
 
 
         // Generate random cards from left to right
@@ -128,7 +147,6 @@ export class Load extends Phaser.Scene {
             loop: true
         });
         
-
        
         // fade out after a while
         // this.time.addEvent({
@@ -151,6 +169,7 @@ export class Load extends Phaser.Scene {
             this.timerDisplay = null;
             this.spawnEvent.remove();
             this.spawnEvent = null;
+            this.gameOver(); 
         }
 
 
@@ -174,7 +193,7 @@ export class Load extends Phaser.Scene {
         card.setData('typeIndex', randomCardIndex);  // Store the index/type of the card
 
             // After spawning a card, adjust the delay
-        const maxDelay = 900; // max delay when timer is full
+        const maxDelay = 1000; // max delay when timer is full
         const minDelay = 300;  // min delay when timer is near zero
         const totalTime = 60; // assuming your timer starts from 100 seconds
 
@@ -193,16 +212,23 @@ export class Load extends Phaser.Scene {
             this.clearTint();
 
             let collidedWithCrate = false;
+            let currentScore = parseInt(this.scene.scoreDisplay.scoreText.text);  // Assuming your score is an integer. Adjust as necessary.
 
             this.scene.crateSprites.forEach((crate, index) => {
                 if (Phaser.Geom.Intersects.RectangleToRectangle(this.getBounds(), crate.getBounds())) {
                     if (this.texture.key === cardNames[index]) { // Only increment counter for matching crate
                         this.scene.crateCounters[index]++;
+                        this.scene.matchCount++;
                         this.scene.crateTexts[index].setText(this.scene.crateCounters[index].toString());
                         collidedWithCrate = true;
 
-                        let currentScore = parseInt(this.scene.scoreDisplay.scoreText.text);  // Assuming your score is an integer. Adjust as necessary.
-                        currentScore += 10;  // Increase score by 10 for every correct drop. Adjust the value as per your game's logic.
+                        
+                        currentScore += 1;  // Increase score by 10 for every correct drop. Adjust the value as per your game's logic.
+                        this.scene.scoreDisplay.updateScore(currentScore);
+                    }
+                    else if (currentScore > 0) {
+                        currentScore -= 1
+                        this.scene.mismatchCount++;
                         this.scene.scoreDisplay.updateScore(currentScore);
                     }
                 }
@@ -227,4 +253,95 @@ export class Load extends Phaser.Scene {
             this.cards.push(card);
     }
 
+
+    gameOver() {
+        // Create a semi-transparent black rectangle as the background of the popup
+        const rect = this.add.rectangle(this.scale.width / 2, this.scale.height / 2, this.scale.width, this.scale.height, 0x000000);
+        rect.alpha = 0.75;
+        rect.setInteractive();  // prevent cards and other objects from being clicked\
+        rect.depth = 10;
+        
+        // Add a round-rectangle
+        const roundRect = this.createRoundedRectangle(this, this.scale.width / 2 - 600, this.scale.height / 2 - 550, 1200, 1000, 27, 0x222747, 15, 0x33b9e3);
+        roundRect.depth = 11;
+
+        // Add Game Over Text
+        const gameOverText = this.add.text(this.scale.width / 2, this.scale.height / 2 - 220, 'GAME OVER!', {
+            font: '150px TruculentaBold',
+            fill: '#33b9e3'
+        });
+        gameOverText.setOrigin(0.5); // to center the text on the button
+        gameOverText.depth = 15;
+
+        // Add Final Score Text
+        const finalScoreText = this.add.text(this.scale.width / 2 - 70, this.scale.height / 2 - 100, 'Final Score:', {
+            font: '80px TruculentaBold',
+            fill: '#2CF8AE'
+        });
+        finalScoreText.setOrigin(0.5); // to center the text on the button
+        finalScoreText.depth = 15;
+
+        // Add Final Score Number Text
+        const finalScoreValue = this.scoreDisplay.scoreText.text;  // Retrieve the current score
+
+        const finalScoreNumText = this.add.text(this.scale.width / 2 + 180, this.scale.height / 2 - 105, finalScoreValue, {
+            font: '80px TruculentaBold',
+            fill: '#2CF8AE'
+        });
+        finalScoreNumText.setOrigin(0.5); // to center the text on the button
+        finalScoreNumText.depth = 15;
+        
+        // Add Match Score
+        const matchesText = this.add.text(this.scale.width / 2, this.scale.height / 2 - 10, `Matches: ${this.matchCount}`, {
+            font: '60px TruculentaBold',
+            fill: '#ffffff'
+        });
+        matchesText.setOrigin(0.5);
+        matchesText.depth = 16;
+
+        // Add Mismatch Score
+        const mismatchesText = this.add.text(this.scale.width / 2, this.scale.height / 2 + 70, `Mismatches: ${this.mismatchCount}`, {
+            font: '60px TruculentaBold',
+            fill: '#ffffff'  // Consider a red-ish color for mismatches
+        });
+        mismatchesText.setOrigin(0.5);
+        mismatchesText.depth = 17;
+
+        // Add a logo
+        const skullLogo = this.add.image(this.scale.width / 2, this.scale.height / 2 - 500, 'skull').setScale(0.75);
+        skullLogo.depth = 13;
+
+        // Add a retry button
+        const retryButton = this.add.image(this.scale.width / 2 - 300, this.scale.height / 2 + 200, 'retryButton').setScale(1.2).setInteractive();
+        retryButton.on('pointerup', () => {
+            this.scene.restart();
+        });
+        retryButton.depth = 14;
+
+        // Add text for the retry button
+        const retryButtonText = this.add.text(this.scale.width / 2 - 300, this.scale.height / 2 + 200, 'PLAY AGAIN', {
+            font: '55px TruculentaBold',
+            fill: '#000000'
+        });
+        retryButtonText.setOrigin(0.5); // to center the text on the button
+        retryButtonText.depth = 15;
+
+        // Add an exit button
+        const exitButton = this.add.image(this.scale.width / 2 + 300, this.scale.height / 2 + 200, 'exitButton').setScale(1.2).setInteractive();
+        exitButton.on('pointerup', () => {
+            // Here you should add logic to exit the game, e.g., go back to the main menu or close the game
+        });
+        exitButton.depth = 16;
+
+        // Add text for the exit button
+        const exitButtonText = this.add.text(this.scale.width / 2 + 300, this.scale.height / 2 + 200, 'EXIT', {
+            font: '55px TruculentaBold',
+            fill: '#ffffff'
+        });
+
+        exitButtonText.setOrigin(0.5); // to center the text on the button
+        exitButtonText.depth = 17;
+        
+
+    }
 }
