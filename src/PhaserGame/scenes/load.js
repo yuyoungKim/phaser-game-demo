@@ -11,6 +11,7 @@ export class Load extends Phaser.Scene {
         this.crateCounters = []; // an array to keep track of the counters
         this.crateTexts = []; // New array to store text objects
         this.timedEvent = null;
+        this.score = 0;
     }
     
     loadFont(name, url) {
@@ -59,6 +60,21 @@ export class Load extends Phaser.Scene {
         bg.setScale(scale);
         const {width, height} = this.scale
         
+        // Insert Title and Text
+        this.add.text(1050, 135, 'Time:', {
+            font: '120px TruculentaBold',
+            fill: '#2CF8AE'
+        });
+
+        this.add.text(2350, 135, 'Score:', {
+            font: '120px TruculentaBold',
+            fill: '#2CF8AE'
+        });
+
+        this.add.text(700, 300, 'SORT THE CARDS INTO THE BOXES BEFORE TIME RUNS OUT', {
+            font: '120px TruculentaBold',
+            fill: '#ffffff'
+        });
 
         // Insert crates
         this.crateSprites  = [];
@@ -94,17 +110,19 @@ export class Load extends Phaser.Scene {
         }
         
         //Insert Scoreboard
-        const score = 100;
-        this.add.score(500, 100, 1, 0, score);
+        let score = 0;
+        this.scoreDisplay = this.add.score(2700, 200, 1, 100, score);
 
         //Insert Timer
-        this.timerDisplay = this.add.timer(1000, 200, 1, 100, 5);
+        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 60);
 
 
         // Generate random cards from left to right
         // Set up a repeating timer to spawn a card every 2 seconds
+
+        const initialDelay = 750;
         this.spawnEvent = this.time.addEvent({
-            delay: 750,
+            delay: initialDelay,
             callback: this.spawnCard,
             callbackScope: this,
             loop: true
@@ -155,6 +173,14 @@ export class Load extends Phaser.Scene {
         const card = this.add.sprite(0, 850, randomCardName).setScale(0.55).setInteractive();
         card.setData('typeIndex', randomCardIndex);  // Store the index/type of the card
 
+            // After spawning a card, adjust the delay
+        const maxDelay = 900; // max delay when timer is full
+        const minDelay = 300;  // min delay when timer is near zero
+        const totalTime = 60; // assuming your timer starts from 100 seconds
+
+        let newDelay = minDelay + (this.timerDisplay.getTime() / totalTime) * (maxDelay - minDelay);
+        this.spawnEvent.delay = newDelay;
+
         // When the card is pressed
         card.on('pointerdown', function (pointer) {
             this.setData('isBeingDragged', true);
@@ -165,17 +191,19 @@ export class Load extends Phaser.Scene {
         card.on('pointerup', function () {
             this.setData('isBeingDragged', false);
             this.clearTint();
-            this.x = this.getData('startPosX');  // Reset the x position to its original
-            this.y = this.getData('startPosY');  // Reset the y position to its original
 
             let collidedWithCrate = false;
 
             this.scene.crateSprites.forEach((crate, index) => {
                 if (Phaser.Geom.Intersects.RectangleToRectangle(this.getBounds(), crate.getBounds())) {
-                    if (this.getData('typeIndex') === index) { // Only increment counter for matching crate
+                    if (this.texture.key === cardNames[index]) { // Only increment counter for matching crate
                         this.scene.crateCounters[index]++;
                         this.scene.crateTexts[index].setText(this.scene.crateCounters[index].toString());
                         collidedWithCrate = true;
+
+                        let currentScore = parseInt(this.scene.scoreDisplay.scoreText.text);  // Assuming your score is an integer. Adjust as necessary.
+                        currentScore += 10;  // Increase score by 10 for every correct drop. Adjust the value as per your game's logic.
+                        this.scene.scoreDisplay.updateScore(currentScore);
                     }
                 }
             });

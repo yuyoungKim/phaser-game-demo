@@ -6,8 +6,7 @@ export default function Game() {
     const [gameRef, setGameRef] = useState(null);
 
     return (
-        
+            <GamePhaser setGameRef={setGameRef} />
 
-        <GamePhaser setGameRef={setGameRef} />
     )
 }

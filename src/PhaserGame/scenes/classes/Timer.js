@@ -6,7 +6,7 @@ export default class Timer extends Phaser.GameObjects.Sprite {
         this.scale = scale;
         this.remainingTime = seconds;
         this.start();
-        this.timerText = this.scene.add.text(this.x, this.y, new Date(seconds * 1000).toISOString().substring(14, 19), { fontSize: fontSize.toString() + "px", fontFamily: "Truculenta-Black", fill: '#B2F1FF', align: 'center' }).setOrigin(0.5, 0.5).setDepth(this.depth + 2);
+        this.timerText = this.scene.add.text(this.x, this.y, seconds.toString(), { fontSize: fontSize.toString() + "px", fontFamily: "TruculentaBold", fill: '#2CF8AE', align: 'center' }).setOrigin(0.5, 0.5).setDepth(this.depth + 2);
     }
 
     start() {
@@ -30,7 +30,7 @@ export default class Timer extends Phaser.GameObjects.Sprite {
 
     updateTime(seconds) {
         this.remainingTime = seconds;
-        this.timerText.setText(new Date(seconds * 1000).toISOString().substring(14, 19));
+        this.timerText.setText(seconds.toString());
     }
 
     getTime() {
