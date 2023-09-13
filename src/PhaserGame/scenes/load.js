@@ -63,7 +63,12 @@ export class Load extends Phaser.Scene {
         //Elements
         this.load.image("crate", '/image/crate.png');
 
-        
+        //Sounds
+        this.load.audio('backgroundSound', './sounds/game-music-loop-3.mp3');
+        this.load.audio('clickSound', './sounds/click.mp3');
+        this.load.audio('wrongSound', './sounds/wrong.mp3');
+        this.load.audio('correctSound', './sounds/shooting-sound.mp3');
+        this.load.audio('gameoverSound', './sounds/gameover.mp3');
     }
 
     create() {
@@ -78,7 +83,8 @@ export class Load extends Phaser.Scene {
         let scale = Math.max(scaleX, scaleY);
         bg.setScale(scale);
         const {width, height} = this.scale
-        
+
+
         // Insert Title and Text
         this.add.text(1050, 135, 'Time:', {
             font: '120px TruculentaBold',
@@ -133,7 +139,11 @@ export class Load extends Phaser.Scene {
         this.scoreDisplay = this.add.score(2700, 200, 1, 100, score);
 
         //Insert Timer
-        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 2);
+        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 5);
+
+        // Background Sound
+        this.sound.play('backgroundSound', { loop: true });
+
 
 
         // Generate random cards from left to right
@@ -169,7 +179,8 @@ export class Load extends Phaser.Scene {
             this.timerDisplay = null;
             this.spawnEvent.remove();
             this.spawnEvent = null;
-            this.gameOver(); 
+            this.gameOver();
+            this.sound.removeByKey('backgroundSound'); 
         }
 
 
@@ -181,7 +192,9 @@ export class Load extends Phaser.Scene {
     }
 
     spawnCard() {
-
+        let click = this.sound.add('clickSound');
+        let wrong = this.sound.add('wrongSound');
+        let correct = this.sound.add('correctSound');
 
         if (this.timerDisplay && this.timerDisplay.getTime() <= 0) {
             return; // exit early if timer reached zero
@@ -203,6 +216,7 @@ export class Load extends Phaser.Scene {
         // When the card is pressed
         card.on('pointerdown', function (pointer) {
             this.setData('isBeingDragged', true);
+            click.play();
             // this.setTint(0xff0000); 
         });
 
@@ -220,6 +234,7 @@ export class Load extends Phaser.Scene {
                         this.scene.crateCounters[index]++;
                         this.scene.matchCount++;
                         this.scene.crateTexts[index].setText(this.scene.crateCounters[index].toString());
+                        correct.play();
                         collidedWithCrate = true;
 
                         
@@ -229,6 +244,7 @@ export class Load extends Phaser.Scene {
                     else if (currentScore > 0) {
                         currentScore -= 1
                         this.scene.mismatchCount++;
+                        wrong.play();
                         this.scene.scoreDisplay.updateScore(currentScore);
                     }
                 }
@@ -255,6 +271,9 @@ export class Load extends Phaser.Scene {
 
 
     gameOver() {
+        let gameover = this.sound.add('gameoverSound');
+        gameover.play();
+
         // Create a semi-transparent black rectangle as the background of the popup
         const rect = this.add.rectangle(this.scale.width / 2, this.scale.height / 2, this.scale.width, this.scale.height, 0x000000);
         rect.alpha = 0.75;
@@ -329,7 +348,9 @@ export class Load extends Phaser.Scene {
         // Add an exit button
         const exitButton = this.add.image(this.scale.width / 2 + 300, this.scale.height / 2 + 200, 'exitButton').setScale(1.2).setInteractive();
         exitButton.on('pointerup', () => {
-            // Here you should add logic to exit the game, e.g., go back to the main menu or close the game
+            this.scene.stop();
+            // Assuming you have a main menu or start scene with key 'StartScene'
+            this.scene.start('StartScene');
         });
         exitButton.depth = 16;
 
