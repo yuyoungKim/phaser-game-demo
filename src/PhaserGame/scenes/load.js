@@ -149,7 +149,7 @@ export class Load extends Phaser.Scene {
         // Generate random cards from left to right
         // Set up a repeating timer to spawn a card every 2 seconds
 
-        const initialDelay = 750;
+        const initialDelay = 750; // !! Move to Update and initialize it with delta, not time !!
         this.spawnEvent = this.time.addEvent({
             delay: initialDelay,
             callback: this.spawnCard,
@@ -277,7 +277,7 @@ export class Load extends Phaser.Scene {
         // Create a semi-transparent black rectangle as the background of the popup
         const rect = this.add.rectangle(this.scale.width / 2, this.scale.height / 2, this.scale.width, this.scale.height, 0x000000);
         rect.alpha = 0.75;
-        rect.setInteractive();  // prevent cards and other objects from being clicked\
+        rect.setInteractive();  // prevent cards and other objects from being clicked
         rect.depth = 10;
         
         // Add a round-rectangle
@@ -360,7 +360,6 @@ export class Load extends Phaser.Scene {
 
         exitButtonText.setOrigin(0.5); // to center the text on the button
         exitButtonText.depth = 17;
-        
 
     }
 }
