@@ -7,7 +7,7 @@ import {Link} from "wouter";
 function Home() {
   return (
     <Container fluid className="Home-background">
-      <video className="w-100" autoPlay muted>
+      <video className="video-size" autoPlay muted>
         <source
           src="logo_animation.mp4"
           type="video/mp4"
