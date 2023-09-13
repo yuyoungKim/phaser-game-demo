@@ -348,9 +348,7 @@ export class Load extends Phaser.Scene {
         // Add an exit button
         const exitButton = this.add.image(this.scale.width / 2 + 300, this.scale.height / 2 + 200, 'exitButton').setScale(1.2).setInteractive();
         exitButton.on('pointerup', () => {
-            this.scene.stop();
-            // Assuming you have a main menu or start scene with key 'StartScene'
-            this.scene.start('StartScene');
+            window.location.href = '/'; // Move to Home
         });
         exitButton.depth = 16;
 
