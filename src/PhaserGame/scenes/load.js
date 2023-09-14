@@ -14,11 +14,32 @@ export class Load extends Phaser.Scene {
         this.score = 0;
         this.matchCount = 0;
         this.mismatchCount = 0;
-        this.spawnRate = 166; // Initial spawn rate: 2 seconds
+        this.spawnRate = 140; // Initial spawn rate:
         this.cardSpawnCounter = 0; // Counter to keep track of elapsed time for card spawning
         this.isGameOver = false;
     }
+
+    saveGameData(score, date) {
+        // Check if both score and date are defined
+        if (score !== undefined && date !== undefined) {
+            const gameData = {
+                score: score,
+                date: date
+            };
     
+            let existingData = JSON.parse(localStorage.getItem('Leaderboard')) || [];
+    
+            existingData.push(gameData);
+            existingData.sort((a, b) => b.score - a.score);
+    
+            localStorage.setItem('Leaderboard', JSON.stringify(existingData));
+        } else {
+            // Handle the case where score or date is undefined
+            console.error('score and date must be defined to save game data.');
+        }
+    }
+    
+
     loadFont(name, url) {
         var newFont = new FontFace(name, `url(${url})`);
         newFont.load().then(function (loaded) {
@@ -142,7 +163,7 @@ export class Load extends Phaser.Scene {
         this.scoreDisplay = this.add.score(2700, 200, 1, 100, score);
 
         //Insert Timer
-        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 3);
+        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 60);
 
         // Background Sound
         this.sound.play('backgroundSound', { loop: true });
@@ -189,7 +210,6 @@ export class Load extends Phaser.Scene {
     }
 
     spawnCard() {
-        
         let click = this.sound.add('clickSound');
         let wrong = this.sound.add('wrongSound');
         let correct = this.sound.add('correctSound');
@@ -339,6 +359,8 @@ export class Load extends Phaser.Scene {
         // Add an exit button
         const exitButton = this.add.image(this.scale.width / 2 + 300, this.scale.height / 2 + 200, 'exitButton').setScale(1.2).setInteractive();
         exitButton.on('pointerup', () => {
+            // Debugging
+            //localStorage.clear();
             window.location.href = '/'; // Move to Home
         });
         exitButton.depth = 16;
@@ -352,5 +374,8 @@ export class Load extends Phaser.Scene {
         exitButtonText.setOrigin(0.5); // to center the text on the button
         exitButtonText.depth = 17;
 
+        // Store date
+        const currentDate = new Date().toISOString().slice(0, 10);  // gets date in YYYY-MM-DD format
+        this.saveGameData(finalScoreValue, currentDate);
     }
 }
