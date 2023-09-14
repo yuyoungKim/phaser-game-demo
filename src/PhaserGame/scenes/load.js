@@ -14,7 +14,7 @@ export class Load extends Phaser.Scene {
         this.score = 0;
         this.matchCount = 0;
         this.mismatchCount = 0;
-        this.spawnRate = 140; // Initial spawn rate:
+        this.spawnRate = 145; // Initial spawn rate:
         this.cardSpawnCounter = 0; // Counter to keep track of elapsed time for card spawning
         this.isGameOver = false;
     }
@@ -158,7 +158,7 @@ export class Load extends Phaser.Scene {
             this.add.image(x, y, cardNames[i]).setScale(0.3)
         }
         
-        //Insert Scoreboard
+        //Insert Score
         let score = 0;
         this.scoreDisplay = this.add.score(2700, 200, 1, 100, score);
 
@@ -374,7 +374,7 @@ export class Load extends Phaser.Scene {
         exitButtonText.setOrigin(0.5); // to center the text on the button
         exitButtonText.depth = 17;
 
-        // Store date
+        // Store date and save date
         const currentDate = new Date().toISOString().slice(0, 10);  // gets date in YYYY-MM-DD format
         this.saveGameData(finalScoreValue, currentDate);
     }
