@@ -16,9 +16,6 @@ function Home() {
 
     return (
         <Container fluid className="Home-background">
-            <audio controls autoplay loop>
-                <source src="./sounds/homeBackground.mp3" type="audio/mpeg" />
-            </audio>
             <header className="site-header">
                 <video className="video-size" autoPlay muted>
                     <source
