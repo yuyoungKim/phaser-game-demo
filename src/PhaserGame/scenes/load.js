@@ -139,7 +139,7 @@ export class Load extends Phaser.Scene {
         this.scoreDisplay = this.add.score(2700, 200, 1, 100, score);
 
         //Insert Timer
-        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 5);
+        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 60);
 
         // Background Sound
         this.sound.play('backgroundSound', { loop: true });
