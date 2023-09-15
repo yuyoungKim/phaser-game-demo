@@ -163,7 +163,7 @@ export class Load extends Phaser.Scene {
         this.scoreDisplay = this.add.score(2700, 200, 1, 100, score);
 
         //Insert Timer
-        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 60);
+        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 3);
 
         // Background Sound
         this.sound.play('backgroundSound', { loop: true });
@@ -376,6 +376,8 @@ export class Load extends Phaser.Scene {
 
         // Store date and save date
         const currentDate = new Date().toISOString().slice(0, 10);  // gets date in YYYY-MM-DD format
-        this.saveGameData(finalScoreValue, currentDate);
+        if (finalScoreValue !== '0') {
+            this.saveGameData(finalScoreValue, currentDate);
+        }
     }
 }

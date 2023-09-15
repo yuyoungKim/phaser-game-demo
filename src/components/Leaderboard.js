@@ -5,7 +5,7 @@ import { Table } from 'react-bootstrap';
 
 const Leaderboard = ({ data }) => {
   return (
-    <Table striped bordered hover>
+    <Table striped bordered hover size="sm">
       <thead>
         <tr>
           <th>#</th>
