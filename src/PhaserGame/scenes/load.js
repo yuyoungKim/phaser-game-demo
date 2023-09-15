@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import Score from './classes/Score.js';
 import timer from './classes/Timer.js'
+import burst from './redNormal.png.png';
+
 export class Load extends Phaser.Scene {
     constructor() {
         super({
@@ -32,6 +34,8 @@ export class Load extends Phaser.Scene {
             existingData.push(gameData);
             existingData.sort((a, b) => b.score - a.score);
     
+            existingData = existingData.slice(0, 10);
+
             localStorage.setItem('Leaderboard', JSON.stringify(existingData));
         } else {
             // Handle the case where score or date is undefined
@@ -65,6 +69,16 @@ export class Load extends Phaser.Scene {
         return graphics;
     }
     
+    createAnimation (spritesheet, frames, frameRate, repeat = -1)
+    {
+        this.anims.create({
+            key: spritesheet + '_ani',
+            frames: this.anims.generateFrameNumbers(spritesheet, { start: 0, end: frames }),
+            frameRate: frameRate,
+            repeat: repeat
+        });
+    }
+
 
     preload() {
         this.loadFont('Truculenta', '/fonts/Truculenta-Regular.ttf');
@@ -93,6 +107,9 @@ export class Load extends Phaser.Scene {
         this.load.audio('wrongSound', './sounds/wrong.mp3');
         this.load.audio('correctSound', './sounds/shooting-sound.mp3');
         this.load.audio('gameoverSound', './sounds/gameover.mp3');
+
+        // VFX
+        this.load.spritesheet('redFlame_spritesheet', burst, { frameWidth: 100, frameHeight: 100, endframe: 65 });
     }
 
     create() {
@@ -163,10 +180,21 @@ export class Load extends Phaser.Scene {
         this.scoreDisplay = this.add.score(2700, 200, 1, 100, score);
 
         //Insert Timer
-        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 60);
+        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 10);  
 
         // Background Sound
         this.sound.play('backgroundSound', { loop: true });
+
+        //VFX
+        this.createAnimation('redFlame_spritesheet', 65, 30, -1);
+        const burst_sprite = this.add.sprite(400, 200, 'redFlame_spritesheet')
+        burst_sprite.setScale(5);
+        burst_sprite.play('redFlame_spritesheet_ani');
+
+        this.createAnimation('redFlame_spritesheet', 65, 30, -1);
+        const burst_sprite1 = this.add.sprite(3400, 200, 'redFlame_spritesheet')
+        burst_sprite1.setScale(5);
+        burst_sprite1.play('redFlame_spritesheet_ani');
 
     }
     
