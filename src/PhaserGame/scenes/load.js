@@ -14,7 +14,7 @@ export class Load extends Phaser.Scene {
         this.score = 0;
         this.matchCount = 0;
         this.mismatchCount = 0;
-        this.spawnRate = 145; // Initial spawn rate:
+        this.spawnRate = 140; // Initial spawn rate:
         this.cardSpawnCounter = 0; // Counter to keep track of elapsed time for card spawning
         this.isGameOver = false;
     }
@@ -163,7 +163,7 @@ export class Load extends Phaser.Scene {
         this.scoreDisplay = this.add.score(2700, 200, 1, 100, score);
 
         //Insert Timer
-        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 3);
+        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 60);
 
         // Background Sound
         this.sound.play('backgroundSound', { loop: true });
@@ -178,7 +178,8 @@ export class Load extends Phaser.Scene {
         }
 
         this.cards.forEach((cards) => {
-            cards.x += 9 * (delta / 6); // Change this value to adjust speed
+            console.log(delta);
+            cards.x += 10 * (delta / 16); // Change this value to adjust speed
 
             if (cards.x > 3840 + 700/2) {
                 cards.destroy();
@@ -192,7 +193,7 @@ export class Load extends Phaser.Scene {
             this.cardSpawnCounter = 0;
             this.spawnCard();
 
-            this.spawnRate -= 1; // Adjust spawn Rate
+            this.spawnRate -= 2; // Adjust spawn Rate
         }
 
         if (this.timerDisplay && this.timerDisplay.getTime() <= 0) {
