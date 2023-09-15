@@ -14,8 +14,32 @@ export class Load extends Phaser.Scene {
         this.score = 0;
         this.matchCount = 0;
         this.mismatchCount = 0;
+        this.spawnRate = 145; // Initial spawn rate:
+        this.cardSpawnCounter = 0; // Counter to keep track of elapsed time for card spawning
+        this.isGameOver = false;
+    }
+
+    saveGameData(score, date) {
+        // Check if both score and date are defined
+        if (score !== undefined && date !== undefined) {
+            const gameData = {
+                score: score,
+                date: date
+            };
+    
+            let existingData = JSON.parse(localStorage.getItem('Leaderboard')) || [];
+    
+            existingData.push(gameData);
+            existingData.sort((a, b) => b.score - a.score);
+    
+            localStorage.setItem('Leaderboard', JSON.stringify(existingData));
+        } else {
+            // Handle the case where score or date is undefined
+            console.error('score and date must be defined to save game data.');
+        }
     }
     
+
     loadFont(name, url) {
         var newFont = new FontFace(name, `url(${url})`);
         newFont.load().then(function (loaded) {
@@ -134,7 +158,7 @@ export class Load extends Phaser.Scene {
             this.add.image(x, y, cardNames[i]).setScale(0.3)
         }
         
-        //Insert Scoreboard
+        //Insert Score
         let score = 0;
         this.scoreDisplay = this.add.score(2700, 200, 1, 100, score);
 
@@ -144,29 +168,17 @@ export class Load extends Phaser.Scene {
         // Background Sound
         this.sound.play('backgroundSound', { loop: true });
 
-
-
-        // Generate random cards from left to right
-        // Set up a repeating timer to spawn a card every 2 seconds
-
-        const initialDelay = 750;
-        this.spawnEvent = this.time.addEvent({
-            delay: initialDelay,
-            callback: this.spawnCard,
-            callbackScope: this,
-            loop: true
-        });
-        
-       
-        // fade out after a while
-        // this.time.addEvent({
-        //         delay: 3900,
-        //         callback: () => { this.cameras.main.fadeOut(500, 0, 0, 0) },
-        // });
     }
-    update() {
+    
+    update(time, delta) {
+        this.deltaValue = delta;
+
+        if (this.isGameOver) {  // Check is game over
+            return;
+        }
+
         this.cards.forEach((cards) => {
-            cards.x += 9; // Change this value to adjust speed
+            cards.x += 9 * (delta / 6); // Change this value to adjust speed
 
             if (cards.x > 3840 + 700/2) {
                 cards.destroy();
@@ -174,16 +186,22 @@ export class Load extends Phaser.Scene {
             }
         });
 
-        if (this.timerDisplay && this.timerDisplay.getTime() <= 0 && this.spawnEvent) {
+        this.cardSpawnCounter += 1;
+        
+        if (this.cardSpawnCounter > this.spawnRate) {
+            this.cardSpawnCounter = 0;
+            this.spawnCard();
+
+            this.spawnRate -= 1; // Adjust spawn Rate
+        }
+
+        if (this.timerDisplay && this.timerDisplay.getTime() <= 0) {
             this.timerDisplay.destroy();
             this.timerDisplay = null;
-            this.spawnEvent.remove();
-            this.spawnEvent = null;
+            this.isGameOver = true;
             this.gameOver();
             this.sound.removeByKey('backgroundSound'); 
         }
-
-
 
         if (this.input.dragElement) {
             this.input.dragElement.x = this.input.activePointer.x;
@@ -204,14 +222,6 @@ export class Load extends Phaser.Scene {
         let randomCardName = cardNames[randomCardIndex];
         const card = this.add.sprite(0, 850, randomCardName).setScale(0.55).setInteractive();
         card.setData('typeIndex', randomCardIndex);  // Store the index/type of the card
-
-            // After spawning a card, adjust the delay
-        const maxDelay = 1000; // max delay when timer is full
-        const minDelay = 300;  // min delay when timer is near zero
-        const totalTime = 60; // assuming your timer starts from 100 seconds
-
-        let newDelay = minDelay + (this.timerDisplay.getTime() / totalTime) * (maxDelay - minDelay);
-        this.spawnEvent.delay = newDelay;
 
         // When the card is pressed
         card.on('pointerdown', function (pointer) {
@@ -277,7 +287,7 @@ export class Load extends Phaser.Scene {
         // Create a semi-transparent black rectangle as the background of the popup
         const rect = this.add.rectangle(this.scale.width / 2, this.scale.height / 2, this.scale.width, this.scale.height, 0x000000);
         rect.alpha = 0.75;
-        rect.setInteractive();  // prevent cards and other objects from being clicked\
+        rect.setInteractive();  // prevent cards and other objects from being clicked
         rect.depth = 10;
         
         // Add a round-rectangle
@@ -334,6 +344,7 @@ export class Load extends Phaser.Scene {
         const retryButton = this.add.image(this.scale.width / 2 - 300, this.scale.height / 2 + 200, 'retryButton').setScale(1.2).setInteractive();
         retryButton.on('pointerup', () => {
             this.scene.restart();
+            this.isGameOver = false;
         });
         retryButton.depth = 14;
 
@@ -348,6 +359,8 @@ export class Load extends Phaser.Scene {
         // Add an exit button
         const exitButton = this.add.image(this.scale.width / 2 + 300, this.scale.height / 2 + 200, 'exitButton').setScale(1.2).setInteractive();
         exitButton.on('pointerup', () => {
+            // Debugging
+            //localStorage.clear();
             window.location.href = '/'; // Move to Home
         });
         exitButton.depth = 16;
@@ -360,7 +373,9 @@ export class Load extends Phaser.Scene {
 
         exitButtonText.setOrigin(0.5); // to center the text on the button
         exitButtonText.depth = 17;
-        
 
+        // Store date and save date
+        const currentDate = new Date().toISOString().slice(0, 10);  // gets date in YYYY-MM-DD format
+        this.saveGameData(finalScoreValue, currentDate);
     }
 }
