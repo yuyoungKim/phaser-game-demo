@@ -17,16 +17,20 @@ function Home() {
     return (
         <Container fluid className="Home-background">
             <header className="site-header">
-                <video className="video-size" autoPlay muted>
-                    <source
-                        src="logo_animation.mp4"
-                        type="video/mp4"
-                    />
-                </video>
+              <video className="video-size" autoPlay muted>
+                <source
+                  src="logo_animation.mp4"
+                  type="video/mp4"
+                  />
+              </video>
+              <audio controls autoplay loop>
+                <source src="./sounds/homeBackground.mp3" type="audio/mpeg" />
+              </audio>
             </header>
             <h1 className="Home-title">
                 Sort Game
             </h1>
+            
             {/* Bottom components aligned */}
             <div className="bottom-container">
                 <h3 className="Home-summary">Sort the cards into the boxes before time runs out! If you drag and drop a card in corresponding crate, you earn 1 score. Otherwise, you lose 1 score.</h3>
