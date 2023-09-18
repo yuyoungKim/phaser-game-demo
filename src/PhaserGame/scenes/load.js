@@ -33,7 +33,7 @@ export class Load extends Phaser.Scene {
             existingData.push(gameData);
             existingData.sort((a, b) => b.score - a.score);
     
-            existingData = existingData.slice(0, 10);
+            existingData = existingData.slice(0, 5);
 
             localStorage.setItem('Leaderboard', JSON.stringify(existingData));
         } else {
@@ -110,7 +110,6 @@ export class Load extends Phaser.Scene {
         // VFX
         this.load.spritesheet('redFlame_spritesheet','./image/redNormal.png.png', { frameWidth: 100, frameHeight: 100, endframe: 65 });
         this.load.spritesheet('purpleFlame_spritesheet', './image/purpleSmall.png.png', { frameWidth: 100, frameHeight: 100, endframe: 40, padding: 10 });
-        this.load.spritesheet('blueFlame_spritesheet', './image/purpleSmall.png.png', { frameWidth: 100, frameHeight: 100, endframe: 65 });
     }
 
     create() {
@@ -181,7 +180,7 @@ export class Load extends Phaser.Scene {
         this.scoreDisplay = this.add.score(2700, 200, 1, 100, score);
 
         //Insert Timer
-        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 2);  
+        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 60);  
 
         // Background Sound
         this.sound.play('backgroundSound', { loop: true });
@@ -208,22 +207,22 @@ export class Load extends Phaser.Scene {
         }
 
         this.cards.forEach((cards) => {
-            console.log(delta);
-            cards.x += (delta);  // Assuming 150 pixels per second movement
+            // console.log(delta);
+            cards.x += (delta); 
 
             if (cards.x > 3840 + 700/2) {
                 cards.destroy();
                 this.cards = this.cards.filter(item => item !== cards);
             }
         });
-
-        this.cardSpawnCounter += 0.8;
+        const spawnIncrementRate = 0.08;
+        this.cardSpawnCounter += spawnIncrementRate * (delta)
         
         if (this.cardSpawnCounter > this.spawnRate) {
             this.cardSpawnCounter = 0;
             this.spawnCard();
 
-            this.spawnRate -= 1; // Adjust spawn Rate
+            this.spawnRate -= 2 ; // Adjust spawn Rate
         }
 
         if (this.timerDisplay && this.timerDisplay.getTime() <= 0) {
