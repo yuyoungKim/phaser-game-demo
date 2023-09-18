@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import Score from './classes/Score.js';
 import timer from './classes/Timer.js'
-import burst from './redNormal.png.png';
 
 export class Load extends Phaser.Scene {
     constructor() {
@@ -78,7 +77,7 @@ export class Load extends Phaser.Scene {
             repeat: repeat
         });
     }
-
+    
 
     preload() {
         this.loadFont('Truculenta', '/fonts/Truculenta-Regular.ttf');
@@ -109,7 +108,9 @@ export class Load extends Phaser.Scene {
         this.load.audio('gameoverSound', './sounds/gameover.mp3');
 
         // VFX
-        this.load.spritesheet('redFlame_spritesheet', burst, { frameWidth: 100, frameHeight: 100, endframe: 65 });
+        this.load.spritesheet('redFlame_spritesheet','./image/redNormal.png.png', { frameWidth: 100, frameHeight: 100, endframe: 65 });
+        this.load.spritesheet('purpleFlame_spritesheet', './image/purpleSmall.png.png', { frameWidth: 100, frameHeight: 100, endframe: 40, padding: 10 });
+        this.load.spritesheet('blueFlame_spritesheet', './image/purpleSmall.png.png', { frameWidth: 100, frameHeight: 100, endframe: 65 });
     }
 
     create() {
@@ -180,7 +181,7 @@ export class Load extends Phaser.Scene {
         this.scoreDisplay = this.add.score(2700, 200, 1, 100, score);
 
         //Insert Timer
-        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 10);  
+        this.timerDisplay = this.add.timer(1390, 200, 1, 120, 2);  
 
         // Background Sound
         this.sound.play('backgroundSound', { loop: true });
@@ -191,15 +192,16 @@ export class Load extends Phaser.Scene {
         burst_sprite.setScale(5);
         burst_sprite.play('redFlame_spritesheet_ani');
 
-        this.createAnimation('redFlame_spritesheet', 65, 30, -1);
         const burst_sprite1 = this.add.sprite(3400, 200, 'redFlame_spritesheet')
         burst_sprite1.setScale(5);
         burst_sprite1.play('redFlame_spritesheet_ani');
 
+        this.createAnimation('purpleFlame_spritesheet', 40, 30, -1);
+        this.createAnimation('blueFlame_spritesheet', 65, 30, -1);
     }
     
     update(time, delta) {
-        this.deltaValue = delta;
+        delta = Math.min(delta, 20);  // capping to avoid large jumps
 
         if (this.isGameOver) {  // Check is game over
             return;
@@ -207,7 +209,7 @@ export class Load extends Phaser.Scene {
 
         this.cards.forEach((cards) => {
             console.log(delta);
-            cards.x += 10 * (delta / 16); // Change this value to adjust speed
+            cards.x += (delta);  // Assuming 150 pixels per second movement
 
             if (cards.x > 3840 + 700/2) {
                 cards.destroy();
@@ -215,13 +217,13 @@ export class Load extends Phaser.Scene {
             }
         });
 
-        this.cardSpawnCounter += 1;
+        this.cardSpawnCounter += 0.8;
         
         if (this.cardSpawnCounter > this.spawnRate) {
             this.cardSpawnCounter = 0;
             this.spawnCard();
 
-            this.spawnRate -= 2; // Adjust spawn Rate
+            this.spawnRate -= 1; // Adjust spawn Rate
         }
 
         if (this.timerDisplay && this.timerDisplay.getTime() <= 0) {
@@ -256,6 +258,7 @@ export class Load extends Phaser.Scene {
         card.on('pointerdown', function (pointer) {
             this.setData('isBeingDragged', true);
             click.play();
+
             // this.setTint(0xff0000); 
         });
 
@@ -274,8 +277,9 @@ export class Load extends Phaser.Scene {
                         this.scene.matchCount++;
                         this.scene.crateTexts[index].setText(this.scene.crateCounters[index].toString());
                         correct.play();
-                        collidedWithCrate = true;
 
+                        collidedWithCrate = true;
+                        
                         
                         currentScore += 1;  // Increase score by 10 for every correct drop. Adjust the value as per your game's logic.
                         this.scene.scoreDisplay.updateScore(currentScore);
@@ -403,6 +407,15 @@ export class Load extends Phaser.Scene {
         exitButtonText.setOrigin(0.5); // to center the text on the button
         exitButtonText.depth = 17;
 
+        const purpleFlame_sprite = this.add.sprite(this.scale.width / 2 - 700, this.scale.height / 2 + 200, 'purpleFlame_spritesheet')
+        purpleFlame_sprite.setScale(10);
+        purpleFlame_sprite.play('purpleFlame_spritesheet_ani');
+        purpleFlame_sprite.depth = 18;
+
+        const purpleFlame_sprite1 = this.add.sprite(this.scale.width / 2 + 700, this.scale.height / 2 + 200, 'purpleFlame_spritesheet')
+        purpleFlame_sprite1.setScale(10);
+        purpleFlame_sprite1.play('purpleFlame_spritesheet_ani');
+        purpleFlame_sprite1.depth = 18;
         // Store date and save date
         const currentDate = new Date().toISOString().slice(0, 10);  // gets date in YYYY-MM-DD format
         if (finalScoreValue !== '0') {

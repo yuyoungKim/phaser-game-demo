@@ -23,7 +23,7 @@ function Home() {
                   type="video/mp4"
                   />
               </video>
-              <audio controls autoplay loop>
+              <audio controls autoPlay loop>
                 <source src="./sounds/homeBackground.mp3" type="audio/mpeg" />
               </audio>
             </header>
